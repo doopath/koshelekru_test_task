@@ -6,26 +6,27 @@ public class HistoryView(string Url)
 {
     private HttpClient _client = new HttpClient();
 
-    public void ShowHistory()
+    public void ShowHistory(int timestamp)
     {
-        ShowBeautified(FetchData().Result);
+        ShowTimestamp(Beautified(FetchData(timestamp).Result));
     }
     
-    private async Task<string> FetchData()
+    private async Task<string> FetchData(int timestamp)
     {
-        using HttpResponseMessage response = await _client.GetAsync(Url);
+        using HttpResponseMessage response = await _client.GetAsync($"{Url}/{timestamp}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
 
-    private void ShowBeautified(string json)
+    private List<string> Beautified(string json)
     {
         var messages = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(json);
+        var beautified = new List<string>();
 
         if (messages is null)
         {
-            Console.WriteLine("No messages");
-            Environment.Exit(0);
+            Console.WriteLine("Fetched data is invalid");
+            Environment.Exit(1);
         }
 
         foreach (var message in messages)
@@ -38,7 +39,15 @@ public class HistoryView(string Url)
                 .First()
                 .Replace("T", " ");
             
-            Console.WriteLine($"{id}. Message: {content} | Sent at: {date}");
+            beautified.Add($"{id}. Message: {content} | Sent at: {date}");
         }
+        
+        return beautified;
+    }
+
+    private void ShowTimestamp(List<string> beautified)
+    {
+        foreach (var message in beautified)
+            Console.WriteLine(message);
     }
 }

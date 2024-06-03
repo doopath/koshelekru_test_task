@@ -4,6 +4,8 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        new HistoryView("http://localhost:5228/api/message/last-10-minutes").ShowHistory();
+        Console.Write("Enter timestamp: ");
+        var timestamp = int.Parse(Console.ReadLine()!);
+        new HistoryView("http://localhost:5228/api/message/last-minutes").ShowHistory(timestamp);
     }
 }
