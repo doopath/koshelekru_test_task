@@ -1,0 +1,5 @@
+CREATE TABLE Messages (
+    Id SERIAL PRIMARY KEY,
+    Content VARCHAR(128),
+    Date TIMESTAMP
+);
