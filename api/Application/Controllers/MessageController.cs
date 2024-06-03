@@ -36,14 +36,14 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet]
-    [Route("last-10-minutes")]
-    public IEnumerable<Message> GetLast10Minutes()
+    [Route("last-minutes/{timestamp:int}")]
+    public IEnumerable<Message> GetLast10Minutes(int timestamp)
     {
         var messages = _repository.GetAll();
-        var last10Minutes = messages
-            .Where(m => m.Date >= DateTime.Now.AddMinutes(-10))
+        var lastMinutes = messages
+            .Where(m => m.Date >= DateTime.Now.AddMinutes(-timestamp))
             .ToList();
         
-        return last10Minutes;
+        return lastMinutes;
     }
 }
