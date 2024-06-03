@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace api.HistoryView;
+namespace Sender.HistoryView;
 
 public class HistoryView(string Url)
 {

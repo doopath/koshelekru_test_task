@@ -1,6 +1,6 @@
 using api.Domain;
 using api.Domain.DTOs;
-using api.Domain.Models;
+using api.Domain.Entities;
 using api.Infrastructure.Contracts;
 using Npgsql;
 

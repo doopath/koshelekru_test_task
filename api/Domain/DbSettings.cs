@@ -1,6 +1,6 @@
-namespace api.Domain;
-
 using api.Domain.Contracts;
+
+namespace api.Domain;
 
 public class DbSettings(IConfiguration configuration) : IDbSettings
 {

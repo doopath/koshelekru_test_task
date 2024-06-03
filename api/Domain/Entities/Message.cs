@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using api.Domain.Contracts;
 
-namespace api.Domain.Models;
+namespace api.Domain.Entities;
 
 public record Message() : IEntity
 {

@@ -1,5 +1,3 @@
-using api.Application.Controllers;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();

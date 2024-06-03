@@ -1,4 +1,4 @@
-﻿namespace api.HistoryView;
+﻿namespace Sender.HistoryView;
 
 public static class Program
 {
