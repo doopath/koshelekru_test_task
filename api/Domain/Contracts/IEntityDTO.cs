@@ -1,3 +1,5 @@
 namespace api.Domain.Contracts;
 
-public interface IEntityDTO { }
+public interface IEntityDTO
+{
+}
