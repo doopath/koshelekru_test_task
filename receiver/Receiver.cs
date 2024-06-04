@@ -12,18 +12,20 @@ public class Receiver
     private readonly HttpClient _httpClient;
     private readonly string _registerUrl;
     private readonly string _receiveUrl;
-    private string _ip;
-    private int _port;
+    private readonly IPAddress _ip;
+    private readonly int _port;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Receiver"/> class.
     /// </summary>
     /// <param name="registerUrl">The URL to register with the server.</param>
     /// <param name="receiverUrl">The URL to receive messages from the server.</param>
-    public Receiver(string registerUrl, string receiverUrl)
+    /// <param name="ip">The IP address that will be listening.</param>
+    /// <param name="port">The port that will be listening.</param>
+    public Receiver(string registerUrl, string receiverUrl, IPAddress ip, int port)
     {
-        _ip = "";
-        _port = 0;
+        _ip = ip;
+        _port = port;
         _httpClient = new HttpClient();
         _registerUrl = registerUrl;
         _receiveUrl = receiverUrl;
@@ -58,7 +60,7 @@ public class Receiver
     /// <returns>The created socket.</returns>
     private Socket CreateSocket()
     {
-        var ipPoint = new IPEndPoint(IPAddress.Parse(_ip), _port);
+        var ipPoint = new IPEndPoint(_ip, _port);
         var tcpListener = new Socket(ipPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp); 
         tcpListener.Bind(ipPoint);
         tcpListener.Listen();
@@ -74,8 +76,6 @@ public class Receiver
         var response = await _httpClient.GetAsync(_registerUrl);
         response.EnsureSuccessStatusCode();
         var pair = (await response.Content.ReadAsStringAsync()).Split(":");
-        _port = int.Parse(pair.TakeLast(1).First());
-        _ip = string.Join(":", pair.SkipLast(1));
     }
 
     /// <summary>

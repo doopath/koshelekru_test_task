@@ -3,6 +3,7 @@ using api.Domain.DTOs;
 using api.Domain.Entities;
 using api.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 
 namespace api.Application.Controllers;
 
@@ -14,6 +15,7 @@ namespace api.Application.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly MessageRepository _repository;
+    private readonly Logger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageController"/> class.
@@ -23,20 +25,20 @@ public class MessageController : ControllerBase
     {
         var dbSettings = new DbSettings(configuration);
         _repository = new(dbSettings);
+        _logger = LogManager.GetCurrentClassLogger();
     }
 
     /// <summary>
     /// Registers a new connection for the notification service.
     /// </summary>
     /// <param name="port">The port number for the connection.</param>
-    /// <returns>The IP address and port number of the new connection.</returns>
     [HttpGet]
-    [Route("in-real-time/{port:int}")]
-    public string InRealTime(int port)
+    [Route("subscribe/{port:int}")]
+    public void Subscribe(int port)
     {
-        var ip = HttpContext.Connection.LocalIpAddress;
-        MessageNotificationServer.AddConnection(ip!.ToString(), port);
-        return $"{ip}:{port}";
+        _logger.Info($"Handling 'subscribe' request.");
+        var host = "host.docker.internal";
+        MessageNotificationServer.AddConnection(host, port);
     }
 
     /// <summary>
@@ -45,8 +47,9 @@ public class MessageController : ControllerBase
     /// <param name="dto">The data transfer object containing the message details.</param>
     [HttpPost]
     [Route("send")]
-    public async void Send(AddMessageDTO dto)
+    public async Task Send(AddMessageDTO dto)
     {
+        _logger.Info($"Handling 'send' request.");
         _repository.Add(dto);
         await MessageNotificationServer.NotifyClients();
     }
@@ -60,11 +63,14 @@ public class MessageController : ControllerBase
     [Route("last-minutes/{timestamp:int}")]
     public IEnumerable<Message> GetLast10Minutes(int timestamp)
     {
+        _logger.Info($"Handling 'last-minutes' request.");
         var messages = _repository.GetAll();
         var lastMinutes = messages
            .Where(m => m.Date >= DateTime.Now.AddMinutes(-timestamp))
            .ToList();
 
+        _logger.Info($"Got {lastMinutes.Count} messages from the last {timestamp} minutes.");
+        
         return lastMinutes;
     }
 }

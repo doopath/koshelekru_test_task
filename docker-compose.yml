@@ -1,0 +1,30 @@
+version: '3.4'
+services:
+  api:
+    container_name: koshelek_api
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5228:5228"
+    depends_on:
+      - db
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Database=koshelek;Username=koshelek;Password=koshelek"
+  db:
+    container_name: koshelek_db
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=koshelek
+      - POSTGRES_PASSWORD=koshelek
+      - POSTGRES_DB=koshelek
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/pgsql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata: {}

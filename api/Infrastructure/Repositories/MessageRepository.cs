@@ -2,6 +2,7 @@ using api.Domain;
 using api.Domain.DTOs;
 using api.Domain.Entities;
 using api.Infrastructure.Contracts;
+using NLog;
 using Npgsql;
 
 namespace api.Infrastructure.Repositories;
@@ -12,6 +13,7 @@ namespace api.Infrastructure.Repositories;
 public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
 {
     private readonly DbSettings _dbSettings;
+    private readonly Logger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageRepository"/> class.
@@ -20,6 +22,7 @@ public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
     public MessageRepository(DbSettings dbSettings)
     {
         _dbSettings = dbSettings;
+        _logger = LogManager.GetCurrentClassLogger();
     }
 
     /// <summary>
@@ -31,7 +34,7 @@ public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
         var query = "SELECT id, content, date FROM Messages";
         var messages = new List<Message>();
 
-        return EnsureConnection<IEnumerable<Message>>((source) =>
+        var result = EnsureConnection<IEnumerable<Message>>((source) =>
         {
             using var command = source.CreateCommand(query);
             using var reader = command.ExecuteReader();
@@ -46,6 +49,10 @@ public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
 
             return messages;
         });
+        
+        _logger.Info($"Retrieved {messages.Count} messages from the database.");
+        
+        return result;
     }
 
     /// <summary>
@@ -63,6 +70,8 @@ public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
             using var command = source.CreateCommand(query);
             command.ExecuteNonQuery();
         });
+
+        _logger.Info("Added a new message to the database.");
     }
 
     /// <summary>
@@ -74,6 +83,8 @@ public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
     private T EnsureConnection<T>(Func<NpgsqlDataSource, T> action)
     {
         using var source = NpgsqlDataSource.Create(_dbSettings.ConnectionString);
+        _logger.Info("Connecting to the database.");
+        
         return action(source);
     }
 
@@ -84,6 +95,8 @@ public class MessageRepository : IEntityRepository<Message, AddMessageDTO>
     private void EnsureConnection(Action<NpgsqlDataSource> action)
     {
         using var source = NpgsqlDataSource.Create(_dbSettings.ConnectionString);
+        _logger.Info("Connected to the database.");
+        
         action(source);
     }
 }
